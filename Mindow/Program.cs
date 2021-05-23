@@ -1,9 +1,5 @@
 ﻿using Mindow.Services;
-using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Management;
-using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Mindow
 {
@@ -12,7 +8,10 @@ namespace Mindow
         static void Main(string[] args)
         {
             Privileges.Check();
-            Programs.Detect();
+
+            Thread t = new Thread(new ThreadStart(Programs.Detect));
+            t.Start();
+            t.Join();
         }
     }
 }

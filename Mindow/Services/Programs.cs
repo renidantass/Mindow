@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Drawing;
-using System.Management;
 using System.Runtime.InteropServices;
+using System.Windows.Automation;
 
 namespace Mindow.Services
 {
@@ -37,40 +36,16 @@ namespace Mindow.Services
 
         public static void Detect()
         {
-            ManagementEventWatcher w = null;
-            WqlEventQuery q;
-            try
+            Automation.AddAutomationEventHandler(WindowPattern.WindowOpenedEvent, AutomationElement.RootElement, TreeScope.Children, (s, ev) =>
             {
-                q = new WqlEventQuery();
-                q.EventClassName = "Win32_ProcessStartTrace";
-                w = new ManagementEventWatcher(q);
-                w.EventArrived += new EventArrivedEventHandler(Programs.ProcessStartEventArrived);
-                w.Start();
-                Console.ReadLine();
-            }
-            finally
-            {
-                w.Stop();
-            }
-        }
-
-        public static void ProcessStartEventArrived(object sender, EventArrivedEventArgs e)
-        {
-            var processId = (UInt32)e.NewEvent.Properties["ProcessId"].Value;
-            try
-            {
-                Process recentlyOpened = Process.GetProcessById((int)processId);
-                if (recentlyOpened.MainWindowTitle != "")
-                {
-                    Console.WriteLine("Programa aberto {0}", recentlyOpened);
-                    WINDOWINFO wINDOWINFO = new WINDOWINFO();
-                    GetWindowInfo(recentlyOpened.MainWindowHandle, ref wINDOWINFO);
-                    MoveWindow(recentlyOpened.MainWindowHandle, Screens.Current.Bounds.X + wINDOWINFO.rcWindow.X, wINDOWINFO.rcWindow.Y, wINDOWINFO.rcWindow.Width, wINDOWINFO.rcWindow.Height, true);
-                }
-            }
-            catch (Exception)
-            {
-            }
+                var element = (AutomationElement)s;
+                var name = element.Current.Name;
+                Console.WriteLine("open: " + name + " hwnd:" + element.Current.NativeWindowHandle);
+                WINDOWINFO wINDOWINFO = new WINDOWINFO();
+                GetWindowInfo((IntPtr)element.Current.NativeWindowHandle, ref wINDOWINFO);
+                MoveWindow((IntPtr)element.Current.NativeWindowHandle, Screens.Current.Bounds.X, wINDOWINFO.rcWindow.Y, wINDOWINFO.rcClient.Width - wINDOWINFO.rcClient.X, wINDOWINFO.rcWindow.Height - wINDOWINFO.rcWindow.Y, true);
+            });
+            Console.ReadLine();
         }
     }
 }
