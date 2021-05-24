@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace Mindow.Services
@@ -12,6 +13,14 @@ namespace Mindow.Services
             {
                 return AllScreens.Where(s => Cursor.Position.X > s.Bounds.X).FirstOrDefault();
             }
+        }
+
+
+        public static System.Windows.Forms.Screen GetScreenFromLocation(int x, int y)
+        {
+            return AllScreens.Where(s => {
+                return x >= s.Bounds.X && y >= s.Bounds.Y;
+            }).FirstOrDefault();
         }
     }
 }

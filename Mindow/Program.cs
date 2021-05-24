@@ -11,7 +11,6 @@ namespace Mindow
 
             Thread t = new Thread(new ThreadStart(Programs.Detect));
             t.Start();
-            t.Join();
         }
     }
 }
